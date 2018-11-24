@@ -15,6 +15,7 @@ using System.IO;
 using System.Windows.Threading;
 using Presto.SDK;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Presto.SWCamp.Lyrics
 {
@@ -23,20 +24,25 @@ namespace Presto.SWCamp.Lyrics
     /// </summary>
     public partial class LyricsWindow : Window
     {
-        string pattern = "([\\.? |]\\.? )";
+        string[] lines = File.ReadAllLines(@"C:\Users\김형래\Desktop\Musics\TWICE - Dance The Night Away.lrc");
+
+        //string pattern = "^[[0-9]?";  
+        string pattern = @"\[([\d]{2,}:[\d]{2}.[\d]{2})\]";
         LyicsManager manager = new LyicsManager();
 
         public LyricsWindow()
         {
-            string[] lines = File.ReadAllLines(@"C:\Users\김형래\Desktop\Musics\볼빨간사춘기 - 여행.lrc");
             InitializeComponent();
+
             
-            foreach (var line in lines)
+            for(int i = 3; i < lines.Length; i++)
             {
+                string[] a = Regex.Split(lines[i], pattern);
+
                 manager.lyics.Add(new Lyics
                 {
-                    time = TimeSpan.ParseExact(line[0].ToString(), @"mm\:ss\.ff", CultureInfo.InvariantCulture),
-                    ly = line[1].ToString()
+                    time = TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture),
+                    ly = a[2]
                 });
             }
 
