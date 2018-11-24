@@ -26,36 +26,26 @@ namespace Presto.SWCamp.Lyrics
     {
         string[] lines = File.ReadAllLines(@"C:\Users\김형래\Desktop\Musics\TWICE - Dance The Night Away.lrc");
         string pattern = @"\[([\d]{2,}:[\d]{2}.[\d]{2})\]";
-        //List<KeyValuePair<TimeSpan, string>> list = new List<KeyValuePair<TimeSpan, string>>();
-
-        LyicsManager manager = new LyicsManager();
-
+        SortedList<double, string> list = new SortedList<double, string>();
+        
         public LyricsWindow()
         {
             InitializeComponent();
             
-
-
             for (int i = 3; i < lines.Length; i++)
             {
                 string[] a = Regex.Split(lines[i], pattern);
-
+                
                 //앞선 가사의 시간이 같은 경우 통합
-                // if (i != 3 && manager.lyics[i-1].time == TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture))
-                //     manager.lyics[i].ly += "\n" + a[2];
-                 
-                manager.lyics.Add(new Lyics
-                {
-                    time = TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture),
-                    ly = a[2]
-                });
+                if (i != 3 && list.Keys[i - 4] == TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture).TotalMilliseconds)
+                     list.Values[i - 4] += "\n" + a[2];
+                list.Add(TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture).TotalMilliseconds, a[2]);
+               
             }
-
-
-            //var time = TimeSpan.ParseExact(manager.lyics[0].time, @"mm\:ss\.ff", CultureInfo.InvariantCulture);
+            
             var timer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(100)
+                Interval = TimeSpan.FromMilliseconds(1)
             };
             timer.Tick += Timer_Tick;
             timer.Start();
@@ -63,12 +53,14 @@ namespace Presto.SWCamp.Lyrics
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            for (int i = 3; i < lines.Length; i++)
+            double CURRENT = PrestoSDK.PrestoService.Player.Position;
+            for (int i = 0; i < list.Keys.Count; i++)
             {
-                if (manager.lyics[i].time == TimeSpan.FromMilliseconds(PrestoSDK.PrestoService.Player.Position))
-                    lyrics.Text = manager.lyics[0].time.ToString();
-            }
+                if (list.Keys[i] <= CURRENT && list.Keys[i + 1] > CURRENT)
+                {
+                    lyrics.Text = list.Values[i];
+                }
+            }          
         }
-
     }
 }
