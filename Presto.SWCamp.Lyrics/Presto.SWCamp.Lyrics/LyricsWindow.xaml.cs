@@ -11,6 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.IO;
+using System.Windows.Threading;
+using Presto.SDK;
 
 namespace Presto.SWCamp.Lyrics
 {
@@ -19,12 +22,24 @@ namespace Presto.SWCamp.Lyrics
     /// </summary>
     public partial class LyricsWindow : Window
     {
+        
+        
         public LyricsWindow()
         {
             InitializeComponent();
 
-            
+            var timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(100)
+            };
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
-        //PrestoSDK.PrestoService.Player.Position
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            lyrics.Text = PrestoSDK.PrestoService.Player.Position.ToString();
+        }
+
     }
 }
