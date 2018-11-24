@@ -8,6 +8,7 @@ namespace Presto.SWCamp.Lyrics
 {
     class Lyics
     {
+
         public TimeSpan time { get; set; }
         public string ly { get; set; }
     }
