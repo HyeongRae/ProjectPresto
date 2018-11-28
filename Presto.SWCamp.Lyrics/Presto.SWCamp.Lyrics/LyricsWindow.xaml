@@ -16,11 +16,9 @@
             FontSize="14"
             Text="{Binding Player.CurrentMusic.Title}"
             TextAlignment="Center" />
-
         <TextBlock
             x:Name ="lyrics"
             FontSize="24"
-            Text="가사가 여기에 표시됩니다."
-            TextAlignment="Center" />
+            TextAlignment="Center" Height="147" Background="#FF7D9C6E" Foreground="White" VerticalAlignment="Center" Text="가사가 여기에 표시됩니다." />
     </StackPanel>
 </Window>

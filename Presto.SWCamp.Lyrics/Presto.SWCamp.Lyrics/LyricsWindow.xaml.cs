@@ -19,14 +19,11 @@ using System.Text.RegularExpressions;
 
 namespace Presto.SWCamp.Lyrics
 {
-    /// <summary>
-    /// LyricsWindow.xaml에 대한 상호 작용 논리
-    /// </summary>
     public partial class LyricsWindow : Window
     {
-        string[] lines = File.ReadAllLines(@"C:\Users\김형래\Desktop\Musics\TWICE - Dance The Night Away.lrc");
-        string pattern = @"\[([\d]{2,}:[\d]{2}.[\d]{2})\]";
-        SortedList<double, string> list = new SortedList<double, string>();
+        string[] lines = File.ReadAllLines(@"C:\Users\김형래\Desktop\Musics\TWICE - Dance The Night Away.lrc"); //가사 파일 불러오기
+        string pattern = @"\[([\d]{2,}:[\d]{2}.[\d]{2})\]";     //정규식으로 파싱
+        SortedList<double, string> list = new SortedList<double, string>(); //시간, 가사 저장
         
         public LyricsWindow()
         {
@@ -35,12 +32,14 @@ namespace Presto.SWCamp.Lyrics
             for (int i = 3; i < lines.Length; i++)
             {
                 string[] a = Regex.Split(lines[i], pattern);
-                
-                //앞선 가사의 시간이 같은 경우 통합
-                if (i != 3 && list.Keys[i - 4] == TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture).TotalMilliseconds)
-                     list.Values[i - 4] += "\n" + a[2];
+
+                //앞선 가사와 시간이 같은 경우 통합
+                if (list.ContainsKey(TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture).TotalMilliseconds))
+                {
+                    list[TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture).TotalMilliseconds] += "\n" + a[2];
+                    continue;
+                }
                 list.Add(TimeSpan.ParseExact(a[1], @"mm\:ss\.ff", CultureInfo.InvariantCulture).TotalMilliseconds, a[2]);
-               
             }
             
             var timer = new DispatcherTimer
@@ -54,13 +53,15 @@ namespace Presto.SWCamp.Lyrics
         private void Timer_Tick(object sender, EventArgs e)
         {
             double CURRENT = PrestoSDK.PrestoService.Player.Position;
+            lyrics.Text = (list.Count - 1).ToString();
+            
             for (int i = 0; i < list.Keys.Count; i++)
             {
                 if (list.Keys[i] <= CURRENT && list.Keys[i + 1] > CURRENT)
                 {
                     lyrics.Text = list.Values[i];
                 }
-            }          
+            }
         }
     }
 }
